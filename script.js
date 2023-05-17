@@ -273,47 +273,146 @@ const renderError = function (msg) {
 // })
 
 
-const getPosition = function () {
-    return new Promise(function (resolve, reject) {
-        navigator.geolocation.getCurrentPosition(resolve,reject);
+// const getPosition = function () {
+//     return new Promise(function (resolve, reject) {
+//         navigator.geolocation.getCurrentPosition(resolve,reject);
+//     })
+// }
+
+
+// const whereAmI = async function () { // 
+//     try {
+//     // Geolocation
+//     const pos = await getPosition();
+//     const {latitude: lat, longitude: lng} = pos.coords;
+
+//     // Reverse geocoding 
+//     const resGeo = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`) // instead of using fetch and then you can use this await
+//     if(!resGeo.ok) throw new Error('Problem getting location data try refereshing')
+//     const dataGeo = await resGeo.json(); // returns a new promise and converts it into a js object
+
+
+//     // Country data 
+//     const res = await fetch (`https://restcountries.com/v2/name/${dataGeo.country}`)
+//     if(!res.ok) throw new Error('Problem getting country data try refereshing')
+//     const data = await res.json();
+//     renderCountry(data[0]);
+
+//     return `You are in ${dataGeo.city}, ${dataGeo.country}`
+//     }
+//     catch (err) {
+//         console.error(`${err}`);
+//         renderError(`something went wrong ${err.message}`)
+//     }
+// };
+
+// console.log("I will get your location");
+
+// (async function () {
+//     try{
+//         const city = await whereAmI()
+//         console.log(`2: ${city}`);
+//     } catch(err){
+//         console.log(`2: ${err.message}`);
+//     }
+//     console.log('3: Finished getting the location')
+// })()
+
+
+
+
+const wait = function (seconds) {
+    return new Promise(function (resolve){
+        setTimeout(resolve, seconds = 1000);
     })
 }
 
 
-const whereAmI = async function () { // 
+const imgContainer = document.querySelector('.images')
+
+const createImages =  function (imgPath) {
+    
+    return new Promise(function  (resolve, reject){
+    
+        const img = document.createElement('img')
+        img.src = imgPath 
+
+        img.addEventListener('load', function() {
+            imgContainer.appendChild(img)
+            resolve(img)
+        });
+        
+        img.addEventListener('error', function() {
+            reject(new Error('image not found'))
+        })
+    
+    })  
+}
+
+let currentImg
+
+// createImages()
+// .then(img => {
+//     currentImg = img
+//     console.log("image 1 loaded")
+//     return wait(2)
+// }).then(() => {
+//     currentImg.style.display = 'none'
+//     return createImages()
+// })
+// .then(img => {
+//     currentImg = img 
+//     console.log("image 2 loaded")
+//     return wait(2)
+// })
+// .then(() => {
+//     currentImg.style.display = 'none'
+// })
+// .catch(err => {
+//     console.error(err);
+// })
+
+// const loadNPause = async function() {
+//     try{
+//         let img = await createImages('img/img-1.jpg')
+//         console.log('Image 1 loaded')
+//         await wait(2)
+//         img.style.display = 'none'
+
+//          img = await createImages('img/img-2.jpg')
+//         console.log('Image 2 loaded')
+//         await wait(2)
+//         img.style.display = 'none'
+
+//     }catch (err){
+//         console.error(err)
+//     }
+// } 
+
+// loadNPause()
+
+
+
+const loadAll = async function (imgArr) {
     try {
-    // Geolocation
-    const pos = await getPosition();
-    const {latitude: lat, longitude: lng} = pos.coords;
+        const imgs = imgArr.map(async img => 
+            await createImages(img));
 
-    // Reverse geocoding 
-    const resGeo = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`) // instead of using fetch and then you can use this await
-    if(!resGeo.ok) throw new Error('Problem getting location data try refereshing')
-    const dataGeo = await resGeo.json(); // returns a new promise and converts it into a js object
+            console.log(imgs)
+
+            const imgsEL = await Promise.all(imgs);
+            
+            imgsEL.forEach(element => {
+                element.classList.add('parallel')
+            })
+
+       
+       
+    } catch (err){
+     console.error(err)
+ }
+}
+
+loadAll(['img/img-1.jpg', 'img/img-2.jpg', 'img/img-3.jpg'])
 
 
-    // Country data 
-    const res = await fetch (`https://restcountries.com/v2/name/${dataGeo.country}`)
-    if(!res.ok) throw new Error('Problem getting country data try refereshing')
-    const data = await res.json();
-    renderCountry(data[0]);
-
-    return `You are in ${dataGeo.city}, ${dataGeo.country}`
-    }
-    catch (err) {
-        console.error(`${err}`);
-        renderError(`something went wrong ${err.message}`)
-    }
-};
-
-console.log("I will get your location");
-
-(async function () {
-    try{
-        const city = await whereAmI()
-        console.log(`2: ${city}`);
-    } catch(err){
-        console.log(`2: ${err.message}`);
-    }
-    console.log('3: Finished getting the location')
-})()
